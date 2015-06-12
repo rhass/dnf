@@ -31,7 +31,7 @@ describe 'dnf_package_upgrade_test' do
     cached(:chef_run) do
       ChefSpec::ServerRunner.new(
         step_into: 'dnf_package',
-        path: 'test/fixtures/fauxhai-fedora-22.json',
+        path: 'test/fixtures/fauxhai-fedora-22.json'
       ).converge(described_recipe)
     end
 

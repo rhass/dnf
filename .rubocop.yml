@@ -30,6 +30,7 @@ Metrics/LineLength:
 
 # for now warn these
 Metrics/MethodLength:
+  Max: 15
   Severity: refactor
 
 Metrics/ClassLength:

@@ -12,5 +12,6 @@ DEPENDENCIES
 GRAPH
   dnf (0.1.0)
   dnf_package_install_test (0.0.1)
+    dnf (>= 0.0.0)
   dnf_package_remove_test (0.0.1)
   dnf_package_upgrade_test (0.0.1)
