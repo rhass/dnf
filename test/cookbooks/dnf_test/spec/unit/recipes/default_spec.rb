@@ -1,13 +1,15 @@
 #
-# Cookbook Name:: dnf
+# Cookbook Name:: dnf_test
 # Spec:: default
 #
 # Copyright (c) 2015 Pantheon Systems, Inc., All Rights Reserved.
 
 require 'spec_helper'
 
-describe 'dnf::default' do
+describe 'dnf_test::default' do
+
   context 'When all attributes are default, on an unspecified platform' do
+
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new
       runner.converge(described_recipe)
@@ -16,5 +18,6 @@ describe 'dnf::default' do
     it 'converges successfully' do
       chef_run # This should not raise an error
     end
+
   end
 end

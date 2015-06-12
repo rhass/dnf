@@ -1,0 +1,11 @@
+DEPENDENCIES
+  dnf
+    path: .
+    metadata: true
+  dnf_test
+    path: test/cookbooks/dnf_test
+
+GRAPH
+  dnf (0.1.0)
+  dnf_test (0.1.0)
+    dnf (>= 0.0.0)
