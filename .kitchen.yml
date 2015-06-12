@@ -8,15 +8,15 @@ provisioner:
 platforms:
 #  - name: fedora-20
   - name: fedora-22
-
+    attribute:
+      kitchen: true
 suites:
-- name: default
-  run_list:
-    - recipe[dnf_test]
-  attributes:
-    kitchen: true
 - name: install
   run_list:
-    - recipe[dnf_test::install]
-  attribute:
-    kitchen: true
+    - recipe[dnf_package_install_test]
+- name: upgrade
+  run_list:
+    - recipe[dnf_package_upgrade_test]
+- name: remove
+  run_list:
+    - recipe[dnf_package_remove_test]

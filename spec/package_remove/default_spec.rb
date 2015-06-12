@@ -22,7 +22,7 @@
 
 require 'spec_helper'
 
-describe 'dnf_test' do
+describe 'dnf_package_remove_test' do
   context 'When all attributes are default, on an unspecified platform' do
     before do
       Fauxhai.mock(path: 'test/fixtures/fauxhai-fedora-22.json')
