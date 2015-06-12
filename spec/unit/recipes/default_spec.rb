@@ -2,8 +2,7 @@
 # Cookbook Name:: dnf
 # Spec:: default
 #
-#
-# Author:: AJ Christensen (<aj@junglistheavy.industries.com>)
+# Author:: AJ Christensen (<aj@junglistheavy.industries>)
 # Author:: Joe Miller (<joeym@joeym.net>)
 # Copyright:: Copyright (c) 2015 Pantheon Systems, Ltd
 # License:: Apache License, Version 2.0
