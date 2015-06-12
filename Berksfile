@@ -27,7 +27,6 @@ end
 end
 
 group :test do
-  fixture_cookbook 'dnf_test'
   fixture_cookbook 'dnf_package_install_test'
   fixture_cookbook 'dnf_package_upgrade_test'
   fixture_cookbook 'dnf_package_remove_test'
