@@ -1,0 +1,1 @@
+FROM quay.io/getpantheon/fedora-test-kitchen:20

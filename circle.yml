@@ -1,0 +1,13 @@
+machine:
+  python:
+    version: 2.7.6
+
+dependencies:
+  cache_directories:
+    - ~/downloads
+  pre:
+    - make deps
+
+test:
+  override:
+    - make

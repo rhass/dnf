@@ -1,16 +1,24 @@
 ---
 driver:
-  name: vagrant
+  name: docker
+  privileged: true
+  run_command: "/usr/sbin/init"
+  remove_images: false
 
 provisioner:
-  name: chef_zero
+  name: chef_solo
 
 platforms:
-  - name: ubuntu-12.04
-  - name: centos-6.5
+  - name: fedora-20
+    driver_config:
+      dockerfile: test/Dockerfile.f20
+  - name: fedora-22
+    driver_config:
+      dockerfile: test/Dockerfile.f22
 
 suites:
-  - name: default
-    run_list:
-      - recipe[dnf::default]
-    attributes:
+- name: default
+  run_list:
+    - recipe[]
+  attributes:
+    kitchen: true

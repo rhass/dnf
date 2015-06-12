@@ -1,0 +1,46 @@
+AllCops:
+  Include:
+    - metadata.rb
+    - Gemfile
+    - attributes/**/*
+    - recipes/**/*
+    - libraries/**/*
+    - providers/**/*
+    - resources/**/*
+  Exclude:
+    - test/**/*
+    - vendor/**/*
+
+Encoding:
+  Exclude:
+    - metadata.rb
+    - Gemfile
+
+Metrics/LineLength:
+  # even at 200 this is pretty noisy
+  Max: 200
+  Severity: refactor
+  # To make it possible to copy or click on URIs in the code, we allow lines
+  # contaning a URI to be longer than Max.
+  AllowURI: true
+  URISchemes:
+    - http
+    - https
+
+
+# for now warn these
+Metrics/MethodLength:
+  Severity: refactor
+
+Metrics/ClassLength:
+  Severity: refactor
+
+Metrics/AbcSize:
+  Severity: refactor
+
+Style/ClassAndModuleChildren:
+  Severity: refactor
+  EnforcedStyle: compact
+
+Style/Documentation:
+  Severity: refactor
