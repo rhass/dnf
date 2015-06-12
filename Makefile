@@ -1,4 +1,4 @@
-all: spec fc rubo test_static test_integration  
+all: spec fc rubo test_static test_integration
 deps: install_chefdk metadata_json
 
 test_static:
@@ -11,7 +11,7 @@ validate_circle:
 	ruby -r yaml -e 'puts YAML.dump(STDIN.read)' < circle.yml
 
 spec:
-	chef exec rspec  --format documentation --color test/spec
+	chef exec rspec  --format documentation --color
 
 fc:
 	chef exec foodcritic -f style,correctness,services,libraries,deprecated .
@@ -27,4 +27,4 @@ install_chefdk:
 	if [ ! -f ~/downloads/chefdk.deb ] ; then curl -o ~/downloads/chefdk.deb -L	https://opscode-omnibus-packages.s3.amazonaws.com/debian/6/x86_64/chefdk_0.4.0-1_amd64.deb ; fi
 	sudo dpkg -i ~/downloads/chefdk.deb
 
-.PHONY: all
+.PHONY: all spec

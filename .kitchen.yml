@@ -15,3 +15,8 @@ suites:
     - recipe[dnf_test]
   attributes:
     kitchen: true
+- name: install
+  run_list:
+    - recipe[dnf_test::install]
+  attribute:
+    kitchen: true

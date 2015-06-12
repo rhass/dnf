@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: dnf_test
+# Cookbook Name:: dnf
 # Spec:: default
 #
 # Author:: AJ Christensen (<aj@junglistheavy.industries>)
@@ -22,18 +22,17 @@
 
 require 'spec_helper'
 
-describe 'dnf_test::default' do
-
+describe 'dnf_package_install_test' do
   context 'When all attributes are default, on an unspecified platform' do
-
-    let(:chef_run) do
-      runner = ChefSpec::ServerRunner.new
-      runner.converge(described_recipe)
+    cached(:chef_run) do
+      ChefSpec::ServerRunner.new(
+        step_into: 'dnf_package',
+        path: 'test/fixtures/fauxhai-fedora-22.json'
+      ).converge(described_recipe)
     end
 
     it 'converges successfully' do
       chef_run # This should not raise an error
     end
-
   end
 end

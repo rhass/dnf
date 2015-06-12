@@ -22,11 +22,17 @@
 
 require 'spec_helper'
 
-describe 'dnf::default' do
+describe 'dnf_test' do
   context 'When all attributes are default, on an unspecified platform' do
-    let(:chef_run) do
-      runner = ChefSpec::ServerRunner.new
-      runner.converge(described_recipe)
+    before do
+      Fauxhai.mock(path: 'test/fixtures/fauxhai-fedora-22.json')
+    end
+
+    cached(:chef_run) do
+      ChefSpec::ServerRunner.new(
+        step_into: 'dnf_package',
+        path: 'test/fixtures/fauxhai-fedora-22.json',
+      ).converge(described_recipe)
     end
 
     it 'converges successfully' do

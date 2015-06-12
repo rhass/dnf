@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: dnf_test
-# Recipe:: default
+# Cookbook Name:: dnf
+# Spec:: default
 #
 # Author:: AJ Christensen (<aj@junglistheavy.industries>)
 # Author:: Joe Miller (<joeym@joeym.net>)
@@ -19,3 +19,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+require 'spec_helper'
+
+describe 'dnf_test' do
+  context 'When all attributes are default, on an unspecified platform' do
+    before do
+      Fauxhai.mock(path: 'test/fixtures/fauxhai-fedora-22.json')
+    end
+
+    cached(:chef_run) do
+      ChefSpec::ServerRunner.new(
+        step_into: 'dnf_package',
+        path: 'test/fixtures/fauxhai-fedora-22.json',
+      ).converge(described_recipe)
+    end
+
+    it 'converges successfully' do
+      chef_run # This should not raise an error
+    end
+  end
+end

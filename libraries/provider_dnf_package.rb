@@ -28,10 +28,11 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
   provides :dnf_package, os: 'linux', platform_family: %w(rhel fedora)
 
-  def install_packge
+  # Install the package with the dnf cli
+  def install_packge(_name, _version)
   end
 
-  def upgrade_package
+  # Upgrade an already-installed package
+  def upgrade_package(_name, _version)
   end
-
 end

@@ -2,10 +2,18 @@ DEPENDENCIES
   dnf
     path: .
     metadata: true
+  dnf_package_install_test
+    path: test/fixtures/dnf_package_install_test
+  dnf_package_remove_test
+    path: test/fixtures/dnf_package_remove_test
+  dnf_package_upgrade_test
+    path: test/fixtures/dnf_package_upgrade_test
   dnf_test
-    path: test/cookbooks/dnf_test
+    path: test/fixtures/dnf_test
 
 GRAPH
   dnf (0.1.0)
-  dnf_test (0.1.0)
-    dnf (>= 0.0.0)
+  dnf_package_install_test (0.0.1)
+  dnf_package_remove_test (0.0.1)
+  dnf_package_upgrade_test (0.0.1)
+  dnf_test (0.0.1)
