@@ -19,16 +19,11 @@
 
 require 'chef/provider/package'
 require 'chef/resource/package'
+require 'chef/mixin/shell_out'
 
 # class Dnf provides a DNF specific package implementation
 class Chef::Provider::Package::Dnf < Chef::Provider::Package
-  if respond_to? :provides
-    provides :package, platform: %w(fedora) do |node|
-      node['platform_version'].to_f >= 22
-    end
-
-    provides :dnf_package, os: 'linux', platform_family: %w(rhel fedora)
-  end
+  include Chef::Mixin::ShellOut
 
   def determine_new_resource_source
     @package_source_exists = false unless
@@ -36,65 +31,123 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
       ::File.exist?(@new_resource.source)
   end
 
-  def determine_and_set_rpm_candidate_version
-    Chef::Log.debug("#{@new_resource} checking rpm status")
-    shell_out_with_timeout!(
-      "rpm -qp --queryformat '%{NAME} %{VERSION}-%{RELEASE}\n' #{@new_resource.source}"
-    ).stdout.each_line do |line|
-      case line
-      when /^(?<package_name>[\w\d+_.-]+)\s(?<version>[\w\d~_.-]+)$/
-        @current_resource.package_name Regexp.last_match[:package_name]
-        @new_resource.version Regexp.last_match[:version]
-        @candidate_version = Regexp.last_match[:version]
-      end
-    end
-  end
-
-  def determine_new_resource_rpm_installed
-    shell_out_with_timeout(
-      "rpm -q --queryformat '%{NAME} %{VERSION}-%{RELEASE}\n' #{@current_resource.package_name}"
-    ).stdout.each_line do |line|
-      case line
-      when /^([\w\d+_.-]+)\s(?<version>[\w\d~_.-]+)$/
-        version = Regexp.last_match[:version]
-        Chef::Log.debug("#{@new_resource} current version is #{version}")
-        @current_resource.version version
-      end
-    end
-  end
-
   def load_current_resource
+    if @new_resource.options
+      repo_control = []
+      @new_resource.options.split.each do |opt|
+        repo_control << opt if opt =~ /--(enable|disable)repo=.+/
+      end
+    end
+
     @current_resource = Chef::Resource::Package.new(@new_resource.name)
     @current_resource.package_name(@new_resource.package_name)
-    @new_resource.version(nil)
 
+    installed_version = []
+    @candidate_version = []
     if @new_resource.source
-      determine_new_resource_source
-      determine_and_set_rpm_candidate_version
-    else
-      if Array(@new_resource.action).include?(:install)
-        @package_source_exists = false
-        return
+      fail(
+        Chef::Exceptions::Package,
+        "Package #{@new_resource.name} not found: #{@new_resource.source}"
+      ) unless ::File.exist?(@new_resource.source)
+
+      Chef::Log.debug("#{@new_resource} checking rpm status")
+      shell_out!(
+        "rpm -qp --queryformat '%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}",
+        timeout: Chef::Config[:yum_timeout]
+      ).stdout.each_line do |line|
+        case line
+        when /(?<package_name>[\w.-]+)\s(?<version>[\w.-]+)/
+          @new_resource.version Regexp.last_match[:version]
+        end
       end
+
+      @candidate_version << @new_resource.version
+      installed_version << installed_version(@current_resource.package_name, arch)
+    else
+      if @new_resource.version
+        new_resource = "#{@new_resource.package_name}-#{@new_resource.version}#{dnf_arch}"
+      else
+        new_resource = "#{@new_resource.package_name}#{dnf_arch}"
+      end
+
+      Chef::Log.debug("#{@new_resource} checking dnf info for #{new_resource}")
+
+      package_names = self.respond_to?(:package_name_array) ?  package_name_array : [@new_resource.package_name].flatten
+      package_names.each do |pkg|
+        installed_version << installed_version(pkg)
+        @candidate_version << available_version(pkg)
+      end
+
     end
 
-    Chef::Log.debug("#{@new_resource} checking install state")
-    determine_new_resource_rpm_installed
+    if installed_version.size == 1
+      @current_resource.version(installed_version[0])
+      @candidate_version = @candidate_version[0]
+    else
+      @current_resource.version(installed_version)
+    end
+
+    Chef::Log.debug("#{@new_resource} installed version: #{installed_version || '(none)'} candidate version: #{@candidate_version || '(none)'}")
+
     @current_resource
   end
 
-  # Install the package with the dnf cli
+  # Return the currently installed version for a package.arch
+  def installed_version(package_name)
+    Chef::Log.debug("#{@new_resource} checking rpm installed state")
+    cmd = shell_out!(
+      "rpm -q --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{package_name}#{dnf_arch}",
+      timeout: Chef::Config[:yum_timeout],
+      returns: [0, 1]
+    )
+    cmd.exitstatus == 0 ? cmd.stdout.chomp : nil
+  end
+
+  # Return the latest available version for a package.arch
+  def available_version(package_name)
+    version = nil
+    Chef::Log.debug("#{@new_resource} checking dnf for available version")
+    cmd = shell_out!(
+      "dnf repoquery -qy --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}' #{package_name}#{dnf_arch}"
+    )
+    cmd.stdout.each_line do |line|
+      version = line.chomp unless line.chomp.empty?
+    end
+    version
+  end
+
+  def dnf_arch
+    arch ? ".#{arch}" : nil
+  end
+
+  def arch
+    @new_resource.arch if @new_resource.respond_to?(:arch)
+  end
+
+  # return a string containing one or more package name-version.arch's
+  # that can be used by install_package and remove_package for
+  # multi-package support
+  def package_spec(name, version)
+    name_array = [name].flatten
+    version_array = [version].flatten
+    name_array.zip(version_array).map do |n, v|
+      sprintf('%s-%s%s', n, v, dnf_arch)
+    end.join(' ')
+  end
+
+  # Install one or more packages with the dnf cli
   def install_package(name, version)
     package_source =
       if @new_resource.source
+        # local rpm install
         @new_resource.source
       else
-        sprintf('%s-%s', name, version)
+        package_spec(name, version)
       end
 
-    shell_out_with_timeout!(
+    shell_out!(
       sprintf(
-        'dnf %s install %s',
+        'dnf %s -qy install %s',
         @new_resource.options,
         package_source
       )
@@ -103,9 +156,15 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
   alias_method :upgrade_package, :install_package
 
-  # Return the latest available version for a package.arch
-  #  def candidate_version(package_name, arch = nil)
-  # TODO(fujin): in order to drop yum-dump.py, we need to figure out how to do this via eager loading
-  # version(package_name, arch, true, false)
-  #  end
+  # remove one or more packages with the dnf cli
+  def remove_package(name, version)
+    package_source = package_spec(name, version)
+    shell_out!(
+      sprintf(
+        'dnf %s -qy remove %s',
+        @new_resource.options,
+        package_source
+      )
+    )
+  end
 end

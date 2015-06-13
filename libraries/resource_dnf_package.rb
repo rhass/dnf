@@ -22,16 +22,35 @@ require_relative 'provider_dnf_package'
 
 # class DnfPackage subclasses the package resource with DNF specific attributes
 class Chef::Resource::DnfPackage < Chef::Resource::Package
+  provides :dnf_package if self.respond_to?(:provides)
+
+  chef_version = Gem::Version.new(Chef::VERSION)
+
+  # chef >= 12.4.0
+  provides :package, platform: 'fedora', platform_version: '>= 22' if chef_version >= Gem::Version.new('12.4.0')
+
+  # chef 12.0.0 - 12.3.0
+  if chef_version >= Gem::Version.new('12.0.0') && chef_version < Gem::Version.new('12.4.0')
+    provides :package, platform: 'fedora' do |node|
+      Chef::VersionConstraint::Platform.new('>= 22').include?(node['platform_version']) if node['platform_version']
+    end
+  end
+
+  # chef < 12.0 (tested on chef-11 only)
+  if chef_version < Gem::Version.new('12.0.0')
+    Chef::Platform.set platform: :fedora, version: '>= 22', resource: :package, provider: Chef::Provider::Package::Dnf
+  end
+
   def initialize(name, run_context = nil)
     super
     @resource_name = :dnf_package
     @provider = Chef::Provider::Package::Dnf
 
-    @flush_cache = { before: false, after: false }
     @allow_downgrade = false
   end
 
   # Install a specific arch
+  # @TODO(joe): implement arch
   def arch(arg = nil)
     set_or_return(
       :arch,
@@ -40,16 +59,7 @@ class Chef::Resource::DnfPackage < Chef::Resource::Package
     )
   end
 
-  def flush_cache(args = {})
-    if args.is_a? Array
-      args.each { |arg| @flush_cache[arg] = true }
-    elsif args.any?
-      @flush_cache = args
-    else
-      @flush_cache
-    end
-  end
-
+  # @TODO(joe): implement downgrade support in provider
   def allow_downgrade(arg = nil)
     set_or_return(
       :allow_downgrade,

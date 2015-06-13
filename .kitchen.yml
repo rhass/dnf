@@ -1,15 +1,23 @@
 ---
 driver:
-  name: vagrant
+  name: docker
+  privileged: true
+  run_command: "/usr/sbin/init"
+  remove_images: false
 
 provisioner:
   name: chef_solo
 
 platforms:
-#  - name: fedora-20
-  - name: fedora-22
-    attribute:
-      kitchen: true
+<% %w(11.16.4 12.3.0 12.4.0).each do |chef_version| %>
+  - name: fedora-22-chef-<%= chef_version %>
+    driver_config:
+      dockerfile: test/Dockerfile.f22
+      attribute:
+        kitchen: true
+      require_chef_omnibus: <%= chef_version %>
+<% end %>
+
 suites:
 - name: install
   run_list:
@@ -20,3 +28,9 @@ suites:
 - name: remove
   run_list:
     - recipe[dnf_package_remove_test]
+- name: multi-package-install
+  run_list:
+    - recipe[dnf_multi_package_install_test]
+- name: multi-package-remove
+  run_list:
+    - recipe[dnf_multi_package_remove_test]
