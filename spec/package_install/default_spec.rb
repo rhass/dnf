@@ -23,7 +23,7 @@
 require 'spec_helper'
 
 describe 'dnf_package_install_test' do
-  context 'When all attributes are default, on an unspecified platform' do
+  context 'When all attributes are default, on Fedora 22' do
     cached(:chef_run) do
       ChefSpec::ServerRunner.new(
         step_into: 'dnf_package',
@@ -31,8 +31,9 @@ describe 'dnf_package_install_test' do
       ).converge(described_recipe)
     end
 
-    it 'converges successfully' do
-      chef_run # This should not raise an error
+    it 'should install the nc6 package' do
+      puts chef_run.node['platform_version']
+      expect(chef_run).to install_dnf_package('nc6')
     end
   end
 end

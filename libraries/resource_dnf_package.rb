@@ -24,6 +24,9 @@ require_relative 'provider_dnf_package'
 class Chef::Resource::DnfPackage < Chef::Resource::Package
   def initialize(name, run_context = nil)
     super
+    @resource_name = :dnf_package
+    @provider = Chef::Provider::Package::Dnf
+
     @flush_cache = { before: false, after: false }
     @allow_downgrade = false
   end
