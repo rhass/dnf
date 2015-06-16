@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ex
 
-TEST_METAL_SSH_USER="root"  # @TODO: change to circleci when new box is ready
-TEST_METAL_HOST="104.130.21.252"  # @TODO: dns would be better
+TEST_METAL_SSH_USER="circleci"
+TEST_METAL_HOST="test-metal.getpantheon.com"
 
 git ls-files > /tmp/syncfiles
 rsync -rz -e "ssh -o GSSAPIAuthentication=no" --files-from /tmp/syncfiles ./ $TEST_METAL_SSH_USER@$TEST_METAL_HOST:/data/circleci/$CIRCLE_PROJECT_REPONAME-$CIRCLE_BUILD_NUM/
@@ -11,6 +11,8 @@ set +e
 
 ssh -A -t -o GSSAPIAuthentication=no $TEST_METAL_SSH_USER@$TEST_METAL_HOST "cd /data/circleci/$CIRCLE_PROJECT_REPONAME-$CIRCLE_BUILD_NUM/ && kitchen test -c --destroy=passing"
 ret=$?
+
+set +x
 
 if [ $ret -gt 0 ]; then
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -22,7 +24,7 @@ if [ $ret -gt 0 ]; then
   echo
   echo "       ssh $TEST_METAL_HOST \"cd /data/circleci/$CIRCLE_PROJECT_REPONAME-$CIRCLE_BUILD_NUM/ && bash --login\""
   echo
-  echo "   When done, please run 'kitchen destroy' to cleanup the buld containers/VMs. "
+  echo "   When done, please run 'kitchen destroy' to cleanup the containers/VMs. "
   echo
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 fi
