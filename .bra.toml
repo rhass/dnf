@@ -1,0 +1,15 @@
+[run]
+init_cmds = [
+	["make", "spec"],
+]						# Commands run in start
+watch_all = true		# Watch all sub-directories
+watch_dirs = []			# Directories to watch
+watch_exts = [".rb"]	# Extensions to watch
+build_delay = 1500		# Minimal interval to Trigger build event
+cmds = [
+	["make", "spec"],
+]
+
+[sync]
+listen_addr = ":5050"
+remote_addr = ":5050"

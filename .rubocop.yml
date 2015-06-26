@@ -9,6 +9,7 @@ AllCops:
     - resources/**/*
   Exclude:
     - test/**/*
+    - libraries/**/*.py
     - vendor/**/*
 
 Encoding:
@@ -44,4 +45,10 @@ Style/ClassAndModuleChildren:
   EnforcedStyle: compact
 
 Style/Documentation:
+  Severity: refactor
+
+Metrics/CyclomaticComplexity:
+  Severity: refactor
+
+Metrics/PerceivedComplexity:
   Severity: refactor

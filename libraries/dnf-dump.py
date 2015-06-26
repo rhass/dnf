@@ -1,7 +1,4 @@
 #
-# Cookbook Name:: dnf
-# Spec:: default
-#
 # Author:: AJ Christensen (<aj@junglistheavy.industries>)
 # Author:: Joe Miller (<joeym@joeym.net>)
 # Copyright:: Copyright (c) 2015 Pantheon Systems, Ltd
@@ -20,23 +17,16 @@
 # limitations under the License.
 #
 
-require 'spec_helper'
+import dnf
+import dnf.sack
+import dnf.cli
+# from dnfpluginsextra import _
 
-describe 'dnf_package_remove_test' do
-  context 'When all attributes are default, on an unspecified platform' do
-    before do
-      Fauxhai.mock(path: 'test/fixtures/fauxhai-fedora-22.json')
-    end
+# TODO(fujin): may not make sense to have this as a dnf plugin - we just need to use the sack.
+class DnfDump(dnf.Plugin):
+    name = 'dnf-dump'
 
-    cached(:chef_run) do
-      ChefSpec::ServerRunner.new(
-        step_into: 'dnf_package',
-        path: 'test/fixtures/fauxhai-fedora-22.json'
-      ).converge(described_recipe)
-    end
-
-    it 'converges successfully' do
-      chef_run # This should not raise an error
-    end
-  end
-end
+    def __init__(self, base, cli):
+        super(DnfDump, self).__init__(base, cli)
+        if cli:
+            cli.register_command(DnfDumpCommand)

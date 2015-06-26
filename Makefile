@@ -14,7 +14,7 @@ spec:
 	chef exec rspec  --format documentation --color
 
 fc:
-	chef exec foodcritic -f style,correctness,services,libraries,deprecated .
+	chef exec foodcritic -f style,correctness,services,libraries,deprecated -X spec .
 
 rubo:
 	chef exec rubocop --fail-fast --fail-level convention --format simple --display-cop-names .
