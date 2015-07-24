@@ -52,17 +52,14 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
       Chef::Log.debug("#{@new_resource} checking rpm status")
       shell_out!(
-        "rpm -qp --queryformat '%{NAME} %{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}",
+        "rpm -qp --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}",
         timeout: Chef::Config[:yum_timeout]
       ).stdout.each_line do |line|
-        case line
-        when /(?<package_name>[\w.-]+)\s(?<version>[\w.-]+)/
-          @new_resource.version Regexp.last_match[:version]
-        end
+        @new_resource.version line.chomp unless line.chomp.empty?
       end
 
       @candidate_version << @new_resource.version
-      installed_version << installed_version(@current_resource.package_name, arch)
+      installed_version << installed_version(@current_resource.package_name)
     else
       if @new_resource.version
         new_resource = "#{@new_resource.package_name}-#{@new_resource.version}#{dnf_arch}"

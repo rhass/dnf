@@ -50,6 +50,28 @@ describe Chef::Provider::Package::Dnf, 'load_current_resource' do
       @provider.load_current_resource
       expect(@provider.current_resource.version).to be_nil
     end
+
+    describe 'and local rpm file is specified via source param' do
+      before(:each) do
+        allow(@new_resource).to receive(:source).and_return('nc6-1.0-21.fc22.x86_64.rpm')
+        allow(@provider).to receive(:installed_version).and_return(nil)
+      end
+
+      it 'should raise exception if the file does not exist' do
+        allow(File).to receive(:exist?).with('nc6-1.0-21.fc22.x86_64.rpm').and_return(false)
+        expect { @provider.load_current_resource }.to raise_exception(Chef::Exceptions::Package, 'Package nc6 not found: nc6-1.0-21.fc22.x86_64.rpm')
+      end
+
+      it 'should set the candidate version to the version of the local rpm file' do
+        allow(File).to receive(:exist?).with('nc6-1.0-21.fc22.x86_64.rpm').and_return(true)
+        rpm_query_double = double('Status', exitstatus: 0, stdout: "0:1.0-21.fc22\n")
+        allow(@provider).to receive(:shell_out!).and_return(rpm_query_double)
+
+        @provider.load_current_resource
+        puts 'JOE:', @provider.candidate_version
+        expect(@provider.candidate_version).to eq '0:1.0-21.fc22'
+      end
+    end
   end
 
   describe 'when querying for package state' do
