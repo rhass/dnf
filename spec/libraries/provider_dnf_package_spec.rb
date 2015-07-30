@@ -98,6 +98,12 @@ describe Chef::Provider::Package::Dnf, 'load_current_resource' do
       allow(@provider).to receive(:shell_out!).and_return(dnf_query_double)
       expect(@provider.available_version('nc6')).to be_nil
     end
+
+    it 'should set the version number to the newest version if multiple versions are available' do
+      dnf_query_double = double('Status', exitstatus: 0, stdout: "0:1.1-1.fc22\n0:1.0-1.fc22\n")
+      allow(@provider).to receive(:shell_out!).and_return(dnf_query_double)
+      expect(@provider.available_version('nc6')).to eq('0:1.1-1.fc22')
+    end
   end
 
   describe 'install_package, when installing a single package' do

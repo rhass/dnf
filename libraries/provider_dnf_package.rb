@@ -100,16 +100,15 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
     cmd.exitstatus == 0 ? cmd.stdout.chomp : nil
   end
 
-  # Return the latest available version for a package.arch
+  # Return the latest available version for a package.arch, else 'nil' if no packages available
   def available_version(package_name)
-    version = nil
     Chef::Log.debug("#{@new_resource} checking dnf for available version")
+    version = nil
     cmd = shell_out!(
       "dnf repoquery -qy --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}' #{package_name}#{dnf_arch}"
     )
-    cmd.stdout.each_line do |line|
-      version = line.chomp unless line.chomp.empty?
-    end
+    first_line = cmd.stdout.lines.first.chomp
+    version = first_line unless first_line.empty?
     version
   end
 
