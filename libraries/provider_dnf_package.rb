@@ -52,7 +52,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
       Chef::Log.debug("#{@new_resource} checking rpm status")
       shell_out!(
-        "rpm -qp --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}"
+        "rpm -qp --queryformat '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\n' #{@new_resource.source}"
       ).stdout.each_line do |line|
         @new_resource.version line.chomp unless line.chomp.empty?
       end
@@ -92,7 +92,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
   def installed_version(package_name)
     Chef::Log.debug("#{@new_resource} checking rpm installed state")
     cmd = shell_out!(
-      "rpm -q --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{package_name}#{dnf_arch}",
+      "rpm -q --queryformat '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\n' #{package_name}#{dnf_arch}",
       returns: [0, 1]
     )
     cmd.exitstatus == 0 ? cmd.stdout.chomp : nil
