@@ -52,7 +52,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
       Chef::Log.debug("#{@new_resource} checking rpm status")
       shell_out!(
-        "rpm -qp --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}"
+        "rpm -qp --queryformat '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\n' #{@new_resource.source}"
       ).stdout.each_line do |line|
         @new_resource.version line.chomp unless line.chomp.empty?
       end
