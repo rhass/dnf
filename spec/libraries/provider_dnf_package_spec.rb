@@ -68,7 +68,6 @@ describe Chef::Provider::Package::Dnf, 'load_current_resource' do
         allow(@provider).to receive(:shell_out!).and_return(rpm_query_double)
 
         @provider.load_current_resource
-        puts 'JOE:', @provider.candidate_version
         expect(@provider.candidate_version).to eq '0:1.0-21.fc22'
       end
     end
