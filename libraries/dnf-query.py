@@ -94,7 +94,12 @@ def run(args):
     # - if pkg_spec is 'systemd.i686', return 'systemd.i686' packages regardless of detected arch.
     # - if pkg_spec is 'tomcat', return 'tomcat.noarch' packages since there is no x86_64 version.
     #
-    requested_arch = dnf.util.first(subj.subj.nevra_possibilities_real(sack, allow_globs=True)).arch
+    poss = dnf.util.first(subj.subj.nevra_possibilities_real(sack, allow_globs=True))
+    if not poss:
+        # no matching packages. we exit success with no output to match dnf-repoquery behavior
+        return
+    requested_arch = poss.arch
+
     if requested_arch:
         q_kwargs['arch'] = ['noarch', requested_arch]
     else:

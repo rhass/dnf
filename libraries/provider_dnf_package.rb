@@ -52,8 +52,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
       Chef::Log.debug("#{@new_resource} checking rpm status")
       shell_out!(
-        "rpm -qp --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}",
-        timeout: Chef::Config[:yum_timeout]
+        "rpm -qp --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{@new_resource.source}"
       ).stdout.each_line do |line|
         @new_resource.version line.chomp unless line.chomp.empty?
       end
@@ -94,7 +93,6 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
     Chef::Log.debug("#{@new_resource} checking rpm installed state")
     cmd = shell_out!(
       "rpm -q --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{package_name}#{dnf_arch}",
-      timeout: Chef::Config[:yum_timeout],
       returns: [0, 1]
     )
     cmd.exitstatus == 0 ? cmd.stdout.chomp : nil
@@ -109,11 +107,12 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
     Chef::Log.debug("#{@new_resource} checking dnf for available version")
     version = nil
     cmd = shell_out!(
-      "#{dnf_query_helper} #{package_name}#{dnf_arch}",
-      timeout: Chef::Config[:yum_timeout]
+      "#{dnf_query_helper} #{package_name}#{dnf_arch}"
     )
-    first_line = cmd.stdout.lines.first.chomp
-    version = first_line unless first_line.empty?
+    first_line = cmd.stdout.lines.first
+    unless first_line.nil?
+      version = first_line.chomp unless first_line.chomp.empty?
+    end
     version
   end
 
