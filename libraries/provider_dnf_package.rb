@@ -92,7 +92,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
   def installed_version(package_name)
     Chef::Log.debug("#{@new_resource} checking rpm installed state")
     cmd = shell_out!(
-      "rpm -q --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}\n' #{package_name}#{dnf_arch}",
+      "rpm -q --queryformat '%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\n' #{package_name}#{dnf_arch}",
       returns: [0, 1]
     )
     cmd.exitstatus == 0 ? cmd.stdout.chomp : nil
