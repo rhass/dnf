@@ -2,8 +2,6 @@
 set -e
 set -x
 
-knife cookbook test --all  --cookbook-path  cookbooks
-
 if which pylint ; then
   find . -name \*.py -exec grep -q pylint {} \; -print0 | xargs -0 python -m py_compile
   find . -name \*.py -exec grep -q pylint {} \; -print0 | xargs -0 pylint

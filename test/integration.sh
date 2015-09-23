@@ -34,5 +34,5 @@ if [ "$CIRCLECI" = "true" ]; then
   fi
   exit $ret
 else
-  kitchen test -c --destroy=passing
+  kitchen test -c 4 --destroy=passing
 fi

@@ -2,26 +2,6 @@ DEPENDENCIES
   dnf
     path: .
     metadata: true
-  dnf_multi_package_install_test
-    path: test/fixtures/dnf_multi_package_install_test
-  dnf_multi_package_remove_test
-    path: test/fixtures/dnf_multi_package_remove_test
-  dnf_package_install_test
-    path: test/fixtures/dnf_package_install_test
-  dnf_package_remove_test
-    path: test/fixtures/dnf_package_remove_test
-  dnf_package_upgrade_test
-    path: test/fixtures/dnf_package_upgrade_test
 
 GRAPH
   dnf (0.1.0)
-  dnf_multi_package_install_test (0.0.1)
-    dnf (>= 0.0.0)
-  dnf_multi_package_remove_test (0.0.1)
-    dnf (>= 0.0.0)
-  dnf_package_install_test (0.0.1)
-    dnf (>= 0.0.0)
-  dnf_package_remove_test (0.0.1)
-    dnf (>= 0.0.0)
-  dnf_package_upgrade_test (0.0.1)
-    dnf (>= 0.0.0)
