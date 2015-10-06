@@ -52,3 +52,6 @@ Metrics/CyclomaticComplexity:
 
 Metrics/PerceivedComplexity:
   Severity: refactor
+
+Style/FormatString:
+  Severity: refactor
