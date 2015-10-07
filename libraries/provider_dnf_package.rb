@@ -68,7 +68,7 @@ class Chef::Provider::Package::Dnf < Chef::Provider::Package
 
       Chef::Log.debug("#{@new_resource} checking dnf info for #{new_resource}")
 
-      package_names = self.respond_to?(:package_name_array) ?  package_name_array : [@new_resource.package_name].flatten
+      package_names = self.respond_to?(:package_name_array) ? package_name_array : [@new_resource.package_name].flatten
       package_names.each do |pkg|
         installed_version << installed_version(pkg)
         @candidate_version << available_version(pkg)

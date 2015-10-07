@@ -1,7 +1,7 @@
-# -*- mode: ruby -*-
 # vim: set ft=ruby:
+# -*- mode: ruby -*-
+source 'https://baryon.gce.panth.io/'
 
-source 'https://supermarket.chef.io/'
 metadata
 
 def fixture_cookbook(name)

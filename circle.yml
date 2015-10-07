@@ -1,13 +1,26 @@
 machine:
+  environment:
+    PATH: ~/bin:$PATH
+
   python:
     version: 2.7.6
 
 dependencies:
   cache_directories:
     - ~/downloads
+    - ~/bin
+
   pre:
     - make deps
 
 test:
   override:
     - make
+
+deployment:
+  prod:
+    branch:
+      - master
+      - release-test
+    commands:
+      - make release
