@@ -21,50 +21,54 @@ require 'chef/resource/package'
 require_relative 'provider_dnf_package'
 
 # class DnfPackage subclasses the package resource with DNF specific attributes
-class Chef::Resource::DnfPackage < Chef::Resource::Package
-  provides :dnf_package if self.respond_to?(:provides)
+unless Chef::Resource.const_defined?('DnfPackage')
+  Chef::Log.info('Loading DNF package resource from cookbook')
 
-  chef_version = Gem::Version.new(Chef::VERSION)
+  class Chef::Resource::DnfPackage < Chef::Resource::Package
+    provides :dnf_package if self.respond_to?(:provides)
 
-  # chef >= 12.4.0
-  provides :package, platform: 'fedora', platform_version: '>= 22' if chef_version >= Gem::Version.new('12.4.0')
+    chef_version = Gem::Version.new(Chef::VERSION)
 
-  # chef 12.0.0 - 12.3.0
-  if chef_version >= Gem::Version.new('12.0.0') && chef_version < Gem::Version.new('12.4.0')
-    provides :package, platform: 'fedora' do |node|
-      Chef::VersionConstraint::Platform.new('>= 22').include?(node['platform_version']) if node['platform_version']
+    # chef >= 12.4.0
+    provides :package, platform: 'fedora', platform_version: '>= 22' if chef_version >= Gem::Version.new('12.4.0')
+
+    # chef 12.0.0 - 12.3.0
+    if chef_version >= Gem::Version.new('12.0.0') && chef_version < Gem::Version.new('12.4.0')
+      provides :package, platform: 'fedora' do |node|
+        Chef::VersionConstraint::Platform.new('>= 22').include?(node['platform_version']) if node['platform_version']
+      end
     end
-  end
 
-  # chef < 12.0 (tested on chef-11 only)
-  if chef_version < Gem::Version.new('12.0.0')
-    Chef::Platform.set platform: :fedora, version: '>= 22', resource: :package, provider: Chef::Provider::Package::Dnf
-  end
+    # chef < 12.0 (tested on chef-11 only)
+    if chef_version < Gem::Version.new('12.0.0')
+      Chef::Platform.set platform: :fedora, version: '>= 22', resource: :package, provider: Chef::Provider::Package::Dnf
+    end
 
-  def initialize(name, run_context = nil)
-    super
-    @resource_name = :dnf_package
-    @provider = Chef::Provider::Package::Dnf
+    def initialize(name, run_context = nil)
+      super
+      @resource_name = :dnf_package
+      @provider = Chef::Provider::Package::Dnf
 
-    @allow_downgrade = false
-  end
+      @allow_downgrade = false
+    end
 
-  # Install a specific arch
-  # @TODO(joe): implement arch
-  def arch(arg = nil)
-    set_or_return(
-      :arch,
-      arg,
-      kind_of: [String, Array]
-    )
-  end
+    # Install a specific arch
+    # @TODO(joe): implement arch
+    def arch(arg = nil)
+      set_or_return(
+        :arch,
+        arg,
+        kind_of: [String, Array]
+      )
+    end
 
-  # @TODO(joe): implement downgrade support in provider
-  def allow_downgrade(arg = nil)
-    set_or_return(
-      :allow_downgrade,
-      arg,
-      kind_of: [TrueClass, FalseClass]
-    )
+    # @TODO(joe): implement downgrade support in provider
+    def allow_downgrade(arg = nil)
+      set_or_return(
+        :allow_downgrade,
+        arg,
+        kind_of: [TrueClass, FalseClass]
+      )
+    end
   end
 end

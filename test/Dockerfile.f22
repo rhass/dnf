@@ -1,1 +1,1 @@
-FROM quay.io/getpantheon/basebox-fedora-22
+FROM quay.io/getpantheon/fedora-test-kitchen:22

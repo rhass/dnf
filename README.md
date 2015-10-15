@@ -52,16 +52,44 @@ Multi-package install:
 Multi-package remove:
 
     package %w(foo bar) do
-      actin :remove
+      action :remove
     end
+
+Performance differences from yum provider
+-----------------------------------------
+
+This provider does not pre-load all the package metadata at the first invocation
+like the yum provider. This may make it less performant than the yum provider but
+we have not benchmarked that yet.
+
+We believe there are a number of problems with the pre-caching of the metadata
+such as huge memory temporary demands and a delay in the chef run as the data is
+loaded.
+
+The dnf provider has the following characteristics:
+
+1. For each package resource, a call to `rpm -q pkg` will be made to determine
+   currently installed version. Anecdotally this takes ~50ms in a simple test VM
+   with a basic fedora-22 install.
+2. For each package resource, a call to the `dnf-query.py` helper will be made
+   to determine available versions. Depending on the metadata expiration settings
+   the dnf library may go fetch remote metadata. Thus, if you have any repos with
+   metadata expiration set to `0` you will pay this penalty on every package call.
+   We solved this in our environment with a short 5min expiration time. If
+   `dnf-query.py` doesn't have to fetch remote data, then the exec will add ~250ms
+   to the runtime.
+
 
 TODOs
 -----
 
 Todos also sprinkled throughout the codebase. Here are some high-level/feature-based TODOs:
 
-- [ ] get 12.3.0 and 12.4.0 support working properly.
-- [ ] change references to `yum_timeout` to `dnf_timeout` (do we need this timeout or can we rely on package class timeout?)
+NOTE: some of these are unanswered questions around the theme of "should we make this compatbile with
+the yum provider or not?". Our current thinking is not to unless there's a compelling reason.
+
+- [x] get 12.3.0 and 12.4.0 support working properly.
+- [x] change references to `yum_timeout` to `dnf_timeout` (do we need this timeout or can we rely on package class timeout?)
 - [x] support multi-package on chef-12
 - [ ] implement package downgrading
 - [x] test on chef 11 for pantheon?
@@ -69,4 +97,4 @@ Todos also sprinkled throughout the codebase. Here are some high-level/feature-b
 - [ ] support specifying version and arch in package name like yum_package does, eg: `package 'foo-1.0-1.fc22.i686'` ?
 - [ ] support specifying version and arch in multi-package too, eg: `package %w(foo-1.0-1.fc22.i686 foo-1.0-1.fc22.x86_64)`
 - [ ] support specifying whatprovides like: `package 'foo >= 1.2.3'` as yum_package does?
-- [ ] should we support yum_package style 'whatprovides'? https://github.com/chef/chef/blob/23e3c799803ac1800149e27271c6168539cea25e/lib/chef/provider/package/yum.rb#L1329
+- [ ] replace the `dnf-query.py` helper with a native ruby lib interface to dnf when/if one ever becomes available.
