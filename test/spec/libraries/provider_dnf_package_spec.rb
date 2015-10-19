@@ -1,6 +1,6 @@
 require 'rspec'
 require_relative '../spec_helper'
-require_relative '../../libraries/dnf_package'
+require_relative '../../../libraries/dnf_package'
 
 describe Chef::Provider::Package::Dnf, 'load_current_resource' do
   before(:each) do
