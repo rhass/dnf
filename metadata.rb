@@ -5,4 +5,4 @@ license 'all_rights'
 description 'Installs/Configures dnf'
 long_description 'Installs/Configures dnf'
 
-version '0.1.1'
+version '0.1.2'
