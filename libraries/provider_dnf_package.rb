@@ -102,7 +102,14 @@ unless Chef::Provider::Package.const_defined?('Dnf')
     end
 
     def dnf_query_helper
-      ::File.join(::File.dirname(__FILE__), 'dnf-query.py')
+      query_helper = ::File.join(Chef::Config['file_cache_path'], 'dnf-query.py')
+
+      f = Chef::Resource::CookbookFile.new(query_helper, run_context)
+      f.mode(0755)
+      f.cookbook('dnf')
+      f.run_action(:create)
+
+      query_helper
     end
 
     # Return the latest available version for a package.arch, else 'nil' if no packages available
